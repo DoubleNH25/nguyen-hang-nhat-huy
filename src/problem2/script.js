@@ -1,11 +1,9 @@
-// Global vars
 var priceData = [];
 var tokenList = [];
 var fromToken, toToken;
 var isFromTokenSelect = true;
 var rate = 0;
 
-// Token config - probably should move this to a separate file later
 const tokens = {
   'ETH': { name: 'Ethereum', icon: 'https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/ETH.svg' },
   'WBTC': { name: 'Wrapped Bitcoin', icon: 'https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/WBTC.svg' },
@@ -30,7 +28,6 @@ function loadPrices() {
     .then(data => {
       priceData = data;
       
-      // Build token list from price data
       let uniqueTokens = new Map();
       
       for(let i = 0; i < priceData.length; i++) {
@@ -50,7 +47,6 @@ function loadPrices() {
       }
       
       tokenList = Array.from(uniqueTokens.values());
-      // Sort by market cap
       tokenList.sort(function(a, b) {
         return (b.price * b.balance) - (a.price * a.balance);
       });
@@ -59,7 +55,6 @@ function loadPrices() {
     })
     .catch(err => {
       console.error('Failed to load prices:', err);
-      // Fallback tokens
       tokenList = [
         {
           symbol: 'ETH',
@@ -87,19 +82,17 @@ function loadPrices() {
 }
 
 function getRandomBalance(price) {
-  // Generate realistic balances based on token price
   if(price > 1000) {
-    return Math.random() * 5 + 0.01; // BTC-like tokens
+    return Math.random() * 5 + 0.01; 
   } else if(price > 100) {
-    return Math.random() * 50 + 1; // ETH-like tokens  
+    return Math.random() * 50 + 1; 
   } else if(price > 1) {
-    return Math.random() * 1000 + 10; // Stablecoins etc
+    return Math.random() * 1000 + 10;
   } else {
-    return Math.random() * 100000 + 1000; // Altcoins
+    return Math.random() * 100000 + 1000; 
   }
 }
 
-// DOM elements
 const fromAmountEl = document.getElementById('from-amount');
 const toAmountEl = document.getElementById('to-amount');
 const fromTokenEl = document.getElementById('from-token-selector');
@@ -114,14 +107,12 @@ const refreshBtn = document.getElementById('refresh-rate');
 const errorEl = document.getElementById('error-message');
 const successModal = document.getElementById('success-modal');
 
-// Initialize app
 document.addEventListener('DOMContentLoaded', function() {
   const loader = document.getElementById('loading-indicator');
   
   form.classList.add('loading');
   
   loadPrices().then(() => {
-    // Set default tokens
     fromToken = tokenList.find(t => t.symbol === 'ETH') || tokenList[0];
     toToken = tokenList.find(t => t.symbol === 'USDC') || tokenList[1];
     
@@ -169,17 +160,14 @@ function setupEvents() {
 }
 
 function updateUI() {
-  // Update from token display
   document.getElementById('from-token-icon').src = fromToken.icon;
   document.getElementById('from-token-symbol').textContent = fromToken.symbol;
   document.getElementById('from-balance').textContent = formatNum(fromToken.balance);
   
-  // Update to token display  
   document.getElementById('to-token-icon').src = toToken.icon;
   document.getElementById('to-token-symbol').textContent = toToken.symbol;
   document.getElementById('to-balance').textContent = formatNum(toToken.balance);
   
-  // Update rate display
   document.getElementById('rate-from').textContent = fromToken.symbol;
   document.getElementById('rate-to').textContent = toToken.symbol;
   
@@ -193,14 +181,12 @@ function onAmountChange() {
     const toAmount = amount * rate;
     toAmountEl.value = formatNum(toAmount, 6);
     
-    // Update USD values
     const fromUsd = amount * fromToken.price;
     const toUsd = toAmount * toToken.price;
     
     document.getElementById('from-usd-value').textContent = formatNum(fromUsd, 2);
     document.getElementById('to-usd-value').textContent = formatNum(toUsd, 2);
     
-    // Validate
     checkAmount(amount);
   } else {
     toAmountEl.value = '';
@@ -231,10 +217,8 @@ function calculateRate() {
   const icon = refreshBtn.querySelector('i');
   icon.classList.add('fa-spin');
   
-  // Simulate API delay
   setTimeout(() => {
     try {
-      // Get latest prices
       const fromPrice = getLatestPrice(fromToken.symbol);
       const toPrice = getLatestPrice(toToken.symbol);
       
@@ -246,13 +230,11 @@ function calculateRate() {
         rate = toToken.price / fromToken.price;
       }
       
-      // Add some market fluctuation
       const fluctuation = (Math.random() - 0.5) * 0.02;
       rate *= (1 + fluctuation);
       
       document.getElementById('exchange-rate').textContent = formatNum(rate, 6);
       
-      // Recalculate if there's input
       if(fromAmountEl.value) {
         onAmountChange();
       }
@@ -269,7 +251,6 @@ function getLatestPrice(symbol) {
   const prices = priceData.filter(item => item.currency === symbol);
   if(prices.length === 0) return null;
   
-  // Sort by date, get latest
   prices.sort((a, b) => new Date(b.date) - new Date(a.date));
   return prices[0].price;
 }
@@ -279,14 +260,12 @@ function swapTokens() {
   fromToken = toToken;
   toToken = temp;
   
-  // Clear inputs
   fromAmountEl.value = '';
   toAmountEl.value = '';
   
   updateUI();
   calculateRate();
   
-  // Animation
   swapBtn.style.transform = 'rotate(180deg)';
   setTimeout(() => {
     swapBtn.style.transform = '';
@@ -330,7 +309,6 @@ function buildTokenList(searchTerm = '') {
   
   tokenListEl.innerHTML = html;
   
-  // Add click handlers
   const items = tokenListEl.querySelectorAll('.token-item');
   for(let i = 0; i < items.length; i++) {
     items[i].addEventListener('click', function() {
@@ -349,7 +327,6 @@ function selectToken(symbol) {
   
   if(isFromTokenSelect) {
     if(token.symbol === toToken.symbol) {
-      // Swap if selecting same token
       swapTokens();
     } else {
       fromToken = token;
@@ -366,7 +343,6 @@ function selectToken(symbol) {
   calculateRate();
   closeModal();
   
-  // Clear amounts
   fromAmountEl.value = '';
   toAmountEl.value = '';
   document.getElementById('from-usd-value').textContent = '0.00';
@@ -389,17 +365,14 @@ function handleSubmit(e) {
   
   setLoading(true);
   
-  // Simulate transaction
   setTimeout(() => {
     try {
-      // Update balances
       fromToken.balance -= amount;
       const toAmount = amount * rate;
       toToken.balance += toAmount;
       
       showSuccess();
       
-      // Reset form
       fromAmountEl.value = '';
       toAmountEl.value = '';
       document.getElementById('from-usd-value').textContent = '0.00';
@@ -494,5 +467,4 @@ function formatNum(num, decimals = 2) {
   }).format(num);
 }
 
-// Global function for onclick
 window.closeSuccessModal = closeSuccess;
