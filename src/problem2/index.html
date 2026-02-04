@@ -1,27 +1,127 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fancy Form</title>
-
-  <!-- You may add more stuff here -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currency Swap - Switcheo</title>
   <link href="style.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-
 <body>
+  <div class="container">
+    <div class="swap-card">
+      <div class="card-header">
+        <h2><i class="fas fa-exchange-alt"></i> Currency Swap</h2>
+        <p>Swap your tokens instantly with the best rates</p>
+      </div>
 
-  <!-- You may reorganise the whole HTML, as long as your form achieves the same effect. -->
-  <form onsubmit="return !1">
-    <h5>Swap</h5>
-    <label for="input-amount">Amount to send</label>
-    <input id="input-amount" />
+      <form id="swap-form" class="swap-form">
+        <div id="loading-indicator" class="loading-indicator">
+          <div class="loading-spinner-large">
+            <i class="fas fa-spinner fa-spin"></i>
+          </div>
+          <p>Loading token prices...</p>
+        </div>
 
-    <label for="output-amount">Amount to receive</label>
-    <input id="output-amount" />
+        <div class="token-section">
+          <div class="section-header">
+            <label>From</label>
+            <div class="balance">Balance: <span id="from-balance">0.00</span></div>
+          </div>
+          
+          <div class="input-group">
+            <input type="number" id="from-amount" placeholder="0.00" step="0.000001" min="0" required />
+            <div class="token-selector" id="from-token-selector">
+              <img id="from-token-icon" src="https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/ETH.svg" alt="ETH" />
+              <span id="from-token-symbol">ETH</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+          
+          <div class="token-value">≈ $<span id="from-usd-value">0.00</span></div>
+        </div>
 
-    <button>CONFIRM SWAP</button>
-  </form>
-  <script src="script.js"></script>
+        <div class="swap-button-container">
+          <button type="button" id="swap-tokens" class="swap-direction-btn">
+            <i class="fas fa-exchange-alt"></i>
+          </button>
+        </div>
+
+        <div class="token-section">
+          <div class="section-header">
+            <label>To</label>
+            <div class="balance">Balance: <span id="to-balance">0.00</span></div>
+          </div>
+          
+          <div class="input-group">
+            <input type="number" id="to-amount" placeholder="0.00" step="0.000001" readonly />
+            <div class="token-selector" id="to-token-selector">
+              <img id="to-token-icon" src="https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/USDC.svg" alt="USDC" />
+              <span id="to-token-symbol">USDC</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+          
+          <div class="token-value">≈ $<span id="to-usd-value">0.00</span></div>
+        </div>
+
+        <div class="exchange-info">
+          <div class="rate-info">
+            <span>1 <span id="rate-from">ETH</span> = <span id="exchange-rate">0.00</span> <span id="rate-to">USDC</span></span>
+            <button type="button" id="refresh-rate" class="refresh-btn">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </div>
+          <div class="slippage-info">
+            <span>Slippage: 0.5% • Real-time prices from Switcheo</span>
+          </div>
+        </div>
+
+        <button type="submit" id="confirm-swap" class="confirm-button" disabled>
+          <span class="button-text">Select tokens to swap</span>
+          <div class="loading-spinner" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i>
+          </div>
+        </button>
+
+        <div id="error-message" class="error-message" style="display: none;"></div>
+      </form>
+    </div>
+
+    <div id="token-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Select Token</h3>
+          <button type="button" class="close-modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="search-container">
+          <input type="text" id="token-search" placeholder="Search tokens..." />
+          <i class="fas fa-search"></i>
+        </div>
+        <div class="token-list" id="token-list"></div>
+      </div>
+    </div>
+
+    <div id="success-modal" class="modal" style="display: none;">
+      <div class="modal-content success-content">
+        <div class="success-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>Swap Successful!</h3>
+        <p>Your transaction has been submitted successfully.</p>
+        <div class="transaction-details">
+          <div class="detail-row">
+            <span>Transaction Hash:</span>
+            <span id="tx-hash">0x1234...5678</span>
+          </div>
+        </div>
+        <button type="button" class="close-success" onclick="closeSuccessModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
 </body>
-
 </html>
